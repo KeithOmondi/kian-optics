@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 app.use(cors({
-  origin: ['https://kian-optics.vercel.app',],
+  origin: ['https://kian-optics.netlify.app',],
   credentials: true
 }));
 
@@ -52,3 +52,4 @@ app.use("/api/v2/withdraw", withdraw);
 app.use(ErrorHandler);
 
 module.exports = app;
+

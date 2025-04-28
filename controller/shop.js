@@ -39,7 +39,7 @@ router.post("/create-shop", catchAsyncErrors(async (req, res, next) => {
 
     const activationToken = createActivationToken(seller);
 
-    const activationUrl = `https://kian-optics.vercel.app/seller/activation/${activationToken}`;
+    const activationUrl = `https://kian-optics.netlify.app/seller/activation/${activationToken}`;
 
     try {
       await sendMail({

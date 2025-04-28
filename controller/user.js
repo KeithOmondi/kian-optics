@@ -35,7 +35,7 @@ router.post("/create-user", async (req, res, next) => {
 
     const activationToken = createActivationToken(user);
 
-    const activationUrl = `https://kian-optics.vercel.app/activation/${activationToken}`;
+    const activationUrl = `https://kian-optics.netlify.app/activation/${activationToken}`;
 
     try {
       await sendMail({
