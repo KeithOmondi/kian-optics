@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 app.use(cors({
-  origin: ['http://localhost:5173',],
+  origin: ['https://kian-optics.vercel.app',],
   credentials: true
 }));
 
