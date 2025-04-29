@@ -16,6 +16,7 @@ const sendMail = async (options) => {
         to: options.email,
         subject: options.subject,
         text: options.message,
+        html: options.htmlMessage  // HTML formatted content
     };
 
     await transporter.sendMail(mailOptions);

@@ -143,76 +143,92 @@ router.put(
   catchAsyncErrors(async (req, res, next) => {
     try {
       const { rating, comment, productId, orderId } = req.body;
-      const user = req.user._id; // Ensure you're getting the user ID from the request object (already authenticated)
+      const user = req.user._id; // Provided by isAuthenticated middleware
 
-      // Validate productId and orderId are valid MongoDB ObjectIds
-      if (!mongoose.Types.ObjectId.isValid(productId) || !mongoose.Types.ObjectId.isValid(orderId)) {
+      // Validate input
+      if (
+        !mongoose.Types.ObjectId.isValid(productId) ||
+        !mongoose.Types.ObjectId.isValid(orderId)
+      ) {
         return next(new ErrorHandler("Invalid product or order ID", 400));
       }
 
-      // Find the product by ID
+      if (typeof rating !== "number" || rating < 1 || rating > 5) {
+        return next(
+          new ErrorHandler("Rating must be a number between 1 and 5", 400)
+        );
+      }
+
+      // Find product and order
       const product = await Product.findById(productId);
       if (!product) {
         return next(new ErrorHandler("Product not found", 404));
       }
 
-      // Find the order by ID to ensure the user has purchased this product
       const order = await Order.findById(orderId);
       if (!order) {
         return next(new ErrorHandler("Order not found", 404));
       }
 
-      // Check if the product is part of the order
-      const isProductInOrder = order.cart.some(item => item.productId.toString() === productId);
-      if (!isProductInOrder) {
-        return next(new ErrorHandler("This product is not part of the order", 400));
-      }
+      const isProductInOrder = order.cart.some((item) => {
+        return (
+          item &&
+          item.productId &&
+          item.productId.toString() === productId
+        );
+      });
+      
 
-      // Prepare the review object
-      const review = {
-        user,
-        rating,
-        comment,
-        productId,
-      };
-
-      // Check if the user has already reviewed the product
+      // Check if user has already reviewed the product
       const existingReview = product.reviews.find(
-        (rev) => rev.user && rev.user.toString() === user.toString()
+        (rev) => rev?.user?.toString() === user.toString()
       );
 
       if (existingReview) {
-        // Update the existing review
         existingReview.rating = rating;
         existingReview.comment = comment;
       } else {
-        // Add a new review
-        product.reviews.push(review);
+        product.reviews.push({
+          user,
+          rating,
+          comment,
+          productId,
+        });
       }
 
-      // Recalculate the average rating
-      let avgRating = 0;
-      product.reviews.forEach((rev) => {
-        avgRating += rev.rating;
-      });
-      product.ratings = avgRating / product.reviews.length;
+      // Recalculate average rating
+      const totalRating = product.reviews.reduce(
+        (sum, review) => sum + review.rating,
+        0
+      );
+      product.ratings = totalRating / product.reviews.length;
 
-      // Save the updated product
       await product.save({ validateBeforeSave: false });
 
-      // Update the order to mark the product as reviewed
+      // Mark product as reviewed in the order
       await Order.findByIdAndUpdate(
         orderId,
         { $set: { "cart.$[elem].isReviewed": true } },
-        { arrayFilters: [{ "elem.productId": mongoose.Types.ObjectId(productId) }], new: true }
-      );
+        {
+          arrayFilters: [
+            { "elem.productId": new mongoose.Types.ObjectId(productId) },
+          ],
+          new: true,
+        }
+      ).catch((err) => {
+        console.error("Error updating order:", err);
+        return next(new ErrorHandler("Failed to update order status", 500));
+      });
 
       res.status(200).json({
         success: true,
         message: "Reviewed successfully!",
       });
     } catch (error) {
-      return next(new ErrorHandler(error.message || "Something went wrong", 400));
+      console.error("Error creating review:", error);
+      return next(
+        new ErrorHandler(error.message || "Something went wrong", 400)
+      );
     }
   })
 );

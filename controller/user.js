@@ -35,7 +35,7 @@ router.post("/create-user", async (req, res, next) => {
 
     const activationToken = createActivationToken(user);
 
-    const activationUrl = `https://kianoptics.netlify.app/activation/${activationToken}`;
+    const activationUrl = `http://localhost:5173/activation/${activationToken}`;
 
     try {
       await sendMail({
