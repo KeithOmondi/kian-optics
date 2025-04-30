@@ -5,13 +5,10 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "https://kianoptics.netlify.app");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
+app.use(cors({
+  origin: ['https://kianoptics.onrender.com'],
+  credentials: true
+}));
 
 
 
@@ -41,6 +38,7 @@ const order = require("./controller/order");
 const conversation = require("./controller/conversation");
 const message = require("./controller/message");
 const withdraw = require("./controller/withdraw");
+const { trusted } = require("mongoose");
 
 app.use("/api/v2/user", user);
 app.use("/api/v2/conversation", conversation);
