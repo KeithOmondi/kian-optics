@@ -35,7 +35,7 @@ router.post("/create-user", async (req, res, next) => {
 
     const activationToken = createActivationToken(user);
 
-    const activationUrl = `https://kianoptics.onrender.com/activation/${activationToken}`;
+    const activationUrl = `https://kianoptics.vercel.app/activation/${activationToken}`;
     
 
     try {
