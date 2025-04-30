@@ -6,9 +6,10 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 app.use(cors({
-  origin: ['https://kianoptics.onrender.com'],
+  origin: ['https://kianoptics.netlify.app', 'https://kianoptics.onrender.com'],
   credentials: true
 }));
+
 
 
 
